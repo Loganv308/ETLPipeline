@@ -1,0 +1,5 @@
+data/old_parsed.csv
+data/new_parsed.csv
+Lib
+src/.env
+pyvenv.cfg
