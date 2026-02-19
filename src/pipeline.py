@@ -1,4 +1,6 @@
 import pandas as pd
+import database
+import os
 
 # First and foremost, extract the data and load it into a pandas dataframe.
 def extractData(filePath: str) -> str:
@@ -30,6 +32,10 @@ def outputData(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == "__main__":
     try:
+        engine = database.createEngine()
+        
+        print(f"Connection to the {os.environ.get('DB_HOST')} for user {os.environ.get('DB_USER')} created successfully.")
+
         data = extractData(r"data\sample_data.csv")
 
         transformedData = transformData(data)
@@ -39,5 +45,5 @@ if __name__ == "__main__":
         print(data.head())
 
         outputData(transformedData)
-    except Exception as e:
-        print(e)
+    except ValueError as e:
+        raise ValueError(f"Invalid database configuration: {e}") from e
