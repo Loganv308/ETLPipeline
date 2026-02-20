@@ -1,12 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 from dotenv import load_dotenv
-import logging
 import os
 
 load_dotenv()
-
-logger = logging.getLogger(__name__)
 
 user = os.environ.get('DB_USER')
 password = os.environ.get('DB_PASSWORD')
@@ -20,30 +17,37 @@ def get_required_env(name: str) -> str:
         raise ValueError(f"Missing required environment variable: {name}")
     return value
 
-def createTable():
-    with open(r'src\\queries\\createTable.sql', 'r') as file:
+def readSQLScript(path: str) -> str:
+    with open(path, 'r') as file:
         content = file.read()
+    return content
 
 def createEngine():
     port = int(get_required_env("DB_PORT"))
 
     connection_url = URL.create(
-        drivername="mysql+pymysql",
+        drivername="mssql+pyodbc",
         username=get_required_env("DB_USER"),
         password=get_required_env("DB_PASSWORD"),
         host=get_required_env("DB_HOST"),
         port=port,
         database=get_required_env("DATABASE"),
+        # Make sure to include these! Driver is necessary for pyodbc. 
+        query={
+            "driver": "ODBC Driver 18 for SQL Server",
+            "Encrypt": "yes",
+            # Sometimes necessary if connection doesn't work off the bat.
+            "TrustServerCertificate": "yes"
+        }
     )
 
+    # Creates the engine using previous arguments. 
     engine = create_engine(
         connection_url,
-        pool_pre_ping=True,      # avoids stale connections
-        pool_size=5,             # adjustable
-        max_overflow=10,
-        echo=False               # True only for debugging
+        # True only for debugging
+        echo=True          
     )
 
-    logger.info("Database engine created successfully")
-
+    # Returns the engine once called
     return engine
+
